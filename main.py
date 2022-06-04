@@ -3,8 +3,8 @@ from twilio.rest import Client
 from credentials import STOCK_API_KEY, NEWS_API_KEY, \
     twilio_account_sid, twilio_auth_token, my_number, twilio_number
 
-STOCK = "PYPL"
-COMPANY_NAME = "Paypal"
+STOCK = "TSLA"
+COMPANY_NAME = "Tesla"
 
 # get the stock info by connecting to the API
 stock_parameters = {
@@ -42,12 +42,10 @@ if major_event():
     # grab the 3 top news stories about the stock with the help of newsapi.org
     news_parameters = {
         "q": COMPANY_NAME,
-        "category": "business",
         "language": "en",
-        "country": "us",
         "apiKey": NEWS_API_KEY
     }
-    data = requests.get(url="https://newsapi.org/v2/top-headlines", params=news_parameters)
+    data = requests.get(url="https://newsapi.org/v2/everything", params=news_parameters)
     news = data.json()
 
     if previous_trading_day - pre_previous_trading_day < 0:
@@ -61,7 +59,7 @@ if major_event():
     # if there is no news for the company, then just send the ticker and the percentage point
     if news["totalResults"] == 0:
         message = client.messages.create(
-            body=f"{STOCK}: {emoji} {percent_difference}",
+            body=f"{STOCK}: {emoji} {percent_difference}%",
             from_=twilio_number,
             to=my_number
         )
@@ -71,9 +69,9 @@ if major_event():
         try:
             for news_item in range(0, 3):
                 message = client.messages.create(
-                    body=f"""{STOCK}: {emoji} {percent_difference}
-                    {news["articles"][news_item]["title"]}
-                    {news["articles"][news_item]["description"]}""",
+                    body=f"""{STOCK}: {emoji} {percent_difference}%
+                    \nTitle: {news["articles"][news_item]["title"]}
+                    \nBrief: {news["articles"][news_item]["description"]}""",
                     from_=twilio_number,
                     to=my_number
                 )
